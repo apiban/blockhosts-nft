@@ -37,6 +37,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"sort"
@@ -249,7 +250,7 @@ func main() {
 	if ips == nil {
 		log.Println("no new ips found. lines read:", bhc.LastLineRead)
 		bhc.Blocked = updateBlocklist(newBlockList)
-		if err := bhc.Update(); err != nil {
+		if err := bhc.AtomicUpdate(); err != nil {
 			log.Fatal(err)
 		}
 
@@ -352,7 +353,7 @@ func main() {
 		PrintIPCount(bhc.Watching)
 	}
 
-	if err := bhc.Update(); err != nil {
+	if err := bhc.AtomicUpdate(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -699,4 +700,54 @@ func GetTime() int64 {
 	now := time.Now()
 	sec := now.Unix()
 	return sec
+}
+
+// AtomicUpdate writes data to a temporary file and atomically renames it to the destination.
+func (cfg *BHconfig) AtomicUpdate() error {
+	// get directory from filename make temp file
+	dir := filepath.Dir(cfg.SourceFile)
+	tmpFile, err := os.CreateTemp(dir, "atomic-save-*.tmp")
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+
+	tmpName := tmpFile.Name()
+
+	// Ensure cleanup if an early return happens due to an error
+	defer func() {
+		if tmpFile != nil {
+			tmpFile.Close()
+		}
+		os.Remove(tmpName) // Safely fails if already renamed
+	}()
+
+	if err := tmpFile.Chmod(0644); err != nil {
+		return fmt.Errorf("failed to set permissions: %w", err)
+	}
+
+	if useyaml {
+		enc := yaml.NewEncoder(tmpFile, yaml.Indent(2), yaml.IndentSequence(true))
+		enc.Encode(cfg)
+	} else {
+		enc := json.NewEncoder(tmpFile)
+		enc.SetIndent("", "\t")
+		enc.Encode(cfg)
+	}
+
+	if err := tmpFile.Sync(); err != nil {
+		return fmt.Errorf("failed to sync temp file to disk: %w", err)
+	}
+
+	if err := tmpFile.Close(); err != nil {
+		tmpFile = nil // Prevent defer from closing again
+		return fmt.Errorf("failed to close temp file: %w", err)
+	}
+
+	tmpFile = nil // Prevent defer from trying to close an already closed file
+
+	if err := os.Rename(tmpName, cfg.SourceFile); err != nil {
+		return fmt.Errorf("failed to replace destination file: %w", err)
+	}
+
+	return nil
 }
