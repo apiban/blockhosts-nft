@@ -52,13 +52,14 @@ import (
 type Re map[string]*regexp.Regexp
 
 var (
-	logFile  string
-	setName  string
-	sshLog   string
-	extraLog bool
-	fullLog  bool
-	useyaml  bool
-	bhc      *BHconfig
+	logFile    string
+	setName    string
+	sshLog     string
+	extraLog   bool
+	fullLog    bool
+	useyaml    bool
+	useCounter bool = false
+	bhc        *BHconfig
 )
 
 type BHconfig struct {
@@ -101,6 +102,7 @@ func init() {
 	flag.BoolVar(&extraLog, "xtra", false, "log extra")
 	flag.BoolVar(&fullLog, "full", false, "read more than 5000 lines of the log")
 	flag.BoolVar(&useyaml, "yaml", true, "use yaml - default is yaml. false is json")
+	flag.BoolVar(&useCounter, "counter", useCounter, "use counter - default is false (no counter)")
 }
 
 func main() {
@@ -152,7 +154,7 @@ func main() {
 	setDetails, err := nftlib.NftListSet(setName)
 	if err != nil {
 		log.Println("[x] cannot verify", setName)
-		errS := bhnft.AddSet(setName)
+		errS := bhnft.AddSet(useCounter, setName)
 		if errS != nil {
 			log.Println("[x] cannot add", setName, "- quiting")
 			os.Exit(2)

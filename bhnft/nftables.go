@@ -70,7 +70,7 @@ func GetTime() int64 {
 	return sec
 }
 
-func AddSet(setName string) error {
+func AddSet(useCounter bool, setName string) error {
 	log.Println("** Attempting to add set and rules")
 	log.Println("[-] finding input chains")
 	inputChains, err := nftlib.NftGetInputChains()
@@ -86,8 +86,14 @@ func AddSet(setName string) error {
 		return errors.New("error getting input chain details")
 	}
 
-	log.Println("[.] creating set", setName, "in", chainDetails.Table, chainDetails.Chain)
-	err = nftlib.NftAddSet(chainDetails, setName)
+	if useCounter {
+		log.Println("[.] creating set", setName, "in", chainDetails.Table, chainDetails.Chain, "with counters")
+		err = nftlib.NftAddSetCounter(chainDetails, setName)
+	} else {
+		log.Println("[.] creating set", setName, "in", chainDetails.Table, chainDetails.Chain)
+		err = nftlib.NftAddSet(chainDetails, setName)
+	}
+
 	if err != nil {
 		log.Println("[x] unable to create set:", err.Error())
 		return errors.New("unable to create set")
