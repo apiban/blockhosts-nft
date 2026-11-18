@@ -6,7 +6,7 @@ The most recent tagged version of blockhosts-nft is supported.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| v0.6.0  | :white_check_mark: |
+| v0.7.0  | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
