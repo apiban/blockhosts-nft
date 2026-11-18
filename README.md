@@ -12,7 +12,7 @@ Log parser / blocker using Golang and nftables.
 
 You can also do the Super Lazy install of:
 
-`curl -sSL https://raw.githubusercontent.com/palner/blockhosts-nft/refs/heads/main/install_blockhosts.sh | bash`
+`curl -sSL https://raw.githubusercontent.com/apiban/blockhosts-nft/refs/heads/main/install_blockhosts.sh | bash`
 
 _If you do the super lazy install, please check the `/etc/hosts.deny` for accuracy as well as adding your IP to `/usr/local/bin/bhconfig.json`._
 
@@ -22,7 +22,7 @@ _If you do the super lazy install, please check the `/etc/hosts.deny` for accura
 
 ```
 cd /usr/local/bin
-wget https://github.com/palner/blockhosts-nft/raw/refs/heads/main/binary/blockhosts-nft
+wget https://github.com/apiban/blockhosts-nft/raw/refs/heads/main/binary/blockhosts-nft
 chmod +x blockhosts-nft
 ```
 
@@ -30,7 +30,7 @@ chmod +x blockhosts-nft
 
 ```
 cd /usr/local/bin
-wget https://raw.githubusercontent.com/palner/blockhosts-nft/refs/heads/main/bhconfig.yaml
+wget https://raw.githubusercontent.com/apiban/blockhosts-nft/refs/heads/main/bhconfig.yaml
 ```
 
 #### Update the config
@@ -101,6 +101,7 @@ sshd : ALL : allow
 - `xtra`: `true|false`. default `false`. Used for extra logging
 - `full`: `true|false`. default `false`. Read full log (vs 5000 line chunks)
 - `yaml`: `true|false`. default `true`. Use YaML (default) or json for config
+- `counter`: `true|false`. default `false`. Use counters (default) for the set in nftables
 
 Example:
 
